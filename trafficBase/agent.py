@@ -15,12 +15,25 @@ class Car(Agent):
             model: Model reference for the agent
         """
         super().__init__(unique_id, model)
+        self.name = "Car"
+        self.availability = False
 
     def move(self):
         """ 
         Determines if the agent can move in the direction that was chosen
-        """        
-        self.model.grid.move_to_empty(self)
+        """
+        possible_steps = [x for x  in self.model.grid.get_neighborhood(self.pos, moore=True, include_center=True)]
+        new_steps = []
+        for step in possible_steps:
+            try:
+                agents = self.model.grid[step[0],step[1]]
+                for agent in agents:
+                    if agent.availability == True:
+                        new_steps.append(step)
+            except:
+                pass
+        #clean_steps = [a for a in possible_steps if a not in new_steps]
+        self.model.grid.move_agent(self, self.random.choice(new_steps))
 
     def step(self):
         """ 
@@ -44,6 +57,8 @@ class Traffic_Light(Agent):
         """
         self.state = state
         self.timeToChange = timeToChange
+        self.name = "Traffic Light"
+        self.availability = True
 
     def step(self):
         """ 
@@ -58,6 +73,8 @@ class Destination(Agent):
     """
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
+        self.name = "Destination"
+        self.availability = True
 
     def step(self):
         pass
@@ -68,6 +85,8 @@ class Obstacle(Agent):
     """
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
+        self.name = "Obstacle"
+        self.availability = False
 
     def step(self):
         pass
@@ -86,6 +105,8 @@ class Road(Agent):
         """
         super().__init__(unique_id, model)
         self.direction = direction
+        self.name = "Road"
+        self.availability = True
 
     def step(self):
         pass

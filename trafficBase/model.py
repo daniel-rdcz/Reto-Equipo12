@@ -48,6 +48,11 @@ class CityModel(Model):
                         agent = Destination(f"d_{r*self.width+c}", self)
                         self.grid.place_agent(agent, (c, self.height - r - 1))
 
+        for i in range(5):
+            agent = Car(f"c_{i}", self)
+            self.schedule.add(agent)
+            self.grid.place_agent(agent, (i, 0))
+
         self.num_agents = N
         self.running = True
 

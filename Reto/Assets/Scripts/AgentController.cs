@@ -56,15 +56,18 @@ public class AgentController : MonoBehaviour
     Attributes:
         serverUrl (string): The url of the server.
         getAgentsEndpoint (string): The endpoint to get the agents data.
+        getObstaclesEndpoint (string): The endpoint to get the obstacles data.
         sendConfigEndpoint (string): The endpoint to send the configuration.
         updateEndpoint (string): The endpoint to update the simulation.
         agentsData (AgentsData): The data of the agents.
+        obstacleData (AgentsData): The data of the obstacles.
         agents (Dictionary<string, GameObject>): A dictionary of the agents.
         prevPositions (Dictionary<string, Vector3>): A dictionary of the previous positions of the agents.
         currPositions (Dictionary<string, Vector3>): A dictionary of the current positions of the agents.
         updated (bool): A boolean to know if the simulation has been updated.
         started (bool): A boolean to know if the simulation has started.
         agentPrefab (GameObject): The prefab of the agents.
+        obstaclePrefab (GameObject): The prefab of the obstacles.
         floor (GameObject): The floor of the simulation.
         NAgents (int): The number of agents.
         width (int): The width of the simulation.
@@ -75,15 +78,16 @@ public class AgentController : MonoBehaviour
     */
     string serverUrl = "http://localhost:8585";
     string getAgentsEndpoint = "/getAgents";
+    string getObstaclesEndpoint = "/getObstacles";
     string sendConfigEndpoint = "/init";
     string updateEndpoint = "/update";
-    AgentsData agentsData;
+    AgentsData agentsData, obstacleData;
     Dictionary<string, GameObject> agents;
     Dictionary<string, Vector3> prevPositions, currPositions;
 
     bool updated = false, started = false;
 
-    public GameObject agentPrefab, floor;
+    public GameObject agentPrefab, obstaclePrefab, floor;
     public int NAgents, width, height;
     public float timeToUpdate = 5.0f;
     private float timer, dt;
@@ -91,6 +95,7 @@ public class AgentController : MonoBehaviour
     void Start()
     {
         agentsData = new AgentsData();
+        obstacleData = new AgentsData();
 
         prevPositions = new Dictionary<string, Vector3>();
         currPositions = new Dictionary<string, Vector3>();
@@ -124,15 +129,15 @@ public class AgentController : MonoBehaviour
             // The positions are interpolated between the previous and current positions.
             foreach(var agent in currPositions)
             {
-
                 Vector3 currentPosition = agent.Value;
                 Vector3 previousPosition = prevPositions[agent.Key];
 
                 Vector3 interpolated = Vector3.Lerp(previousPosition, currentPosition, dt);
                 Vector3 direction = currentPosition - interpolated;
 
-                ApplyTransforms agente = agents[agent.Key].GetComponent<ApplyTransforms>();
-                agente.displacement = interpolated;
+                agents[agent.Key].GetComponent<ApplyTransforms>().displacement = interpolated;
+
+                if(direction != Vector3.zero) agents[agent.Key].GetComponent<ApplyTransforms>().direction = direction;
             }
 
             // float t = (timer / timeToUpdate);
@@ -182,6 +187,7 @@ public class AgentController : MonoBehaviour
 
             // Once the configuration has been sent, it launches a coroutine to get the agents data.
             StartCoroutine(GetAgentsData());
+            StartCoroutine(GetObstacleData());
         }
     }
 
@@ -220,6 +226,26 @@ public class AgentController : MonoBehaviour
 
             updated = true;
             if(!started) started = true;
+        }
+    }
+
+    IEnumerator GetObstacleData() 
+    {
+        UnityWebRequest www = UnityWebRequest.Get(serverUrl + getObstaclesEndpoint);
+        yield return www.SendWebRequest();
+ 
+        if (www.result != UnityWebRequest.Result.Success)
+            Debug.Log(www.error);
+        else 
+        {
+            obstacleData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
+
+            Debug.Log(obstacleData.positions);
+
+            foreach(AgentData obstacle in obstacleData.positions)
+            {
+                Instantiate(obstaclePrefab, new Vector3(obstacle.x, obstacle.y, obstacle.z), Quaternion.identity);
+            }
         }
     }
 }

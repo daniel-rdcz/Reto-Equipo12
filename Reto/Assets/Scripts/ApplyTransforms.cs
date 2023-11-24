@@ -72,9 +72,9 @@ public class ApplyTransforms : MonoBehaviour
         Matrix4x4 resize = HW_Transforms.ScaleMat(0.4f, 0.2f, 0.6f);
         Matrix4x4 resize_wheels  = HW_Transforms.ScaleMat(0.2f, 0.2f, 0.2f);
         // A matrix to move the object
-        Matrix4x4 move = HW_Transforms.TranslationMat(displacement.x * Time.time,
-                                                      displacement.y * Time.time,
-                                                      displacement.z * Time.time);
+        Matrix4x4 move = HW_Transforms.TranslationMat(displacement.x,
+                                                      displacement.y,
+                                                      displacement.z);
 
         Matrix4x4 spinWheels = HW_Transforms.RotateMat(-20 * Time.time,
                                                        AXIS.X);

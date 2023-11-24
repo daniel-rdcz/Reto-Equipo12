@@ -116,11 +116,13 @@ public class ApplyTransforms : MonoBehaviour
             }
             meshWheel[v].vertices = newVerticesWheel[v];
             meshWheel[v].RecalculateNormals();
+            meshWheel[v].RecalculateBounds();
         }
 
         // Replace the vertices in the mesh
         mesh.vertices = newVertices;
         // Make sure the normals are adapted to the new vertex positions
         mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
     }
 }

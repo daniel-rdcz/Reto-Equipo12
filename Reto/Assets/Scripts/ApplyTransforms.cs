@@ -77,13 +77,13 @@ public class ApplyTransforms : MonoBehaviour
                                                       displacement.y,
                                                       displacement.z);
 
-        Matrix4x4 spinWheels = HW_Transforms.RotateMat(-160 * Time.time,
-                                                       AXIS.X);
+        float spinAngle = -160 * direction.magnitude;
+        Matrix4x4 spinWheels = HW_Transforms.RotateMat(spinAngle,
+                                                 AXIS.X);
         
         // Calculate displacement
 
         float rotateAngle = Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg - 270;
-        Debug.Log(rotateAngle);
         Matrix4x4 rotateObject = HW_Transforms.RotateMat(rotateAngle,
                                                          AXIS.Y);
 

@@ -20,20 +20,16 @@ class Car(Agent):
 
     def move(self):
         """ 
-        Determines if the agent can move in the direction that was chosen
+        Moves the agent in the positive x direction by 1 unit.
         """
-        possible_steps = [x for x  in self.model.grid.get_neighborhood(self.pos, moore=True, include_center=True)]
-        new_steps = []
-        for step in possible_steps:
-            try:
-                agents = self.model.grid[step[0],step[1]]
-                for agent in agents:
-                    if agent.availability == True:
-                        new_steps.append(step)
-            except:
-                pass
-        #clean_steps = [a for a in possible_steps if a not in new_steps]
-        self.model.grid.move_agent(self, self.random.choice(new_steps))
+        new_x = self.pos[0] + 1
+        new_y = self.pos[1]
+        
+        # Check if the new position is within the model's grid boundaries
+        if 0 <= new_x < self.model.grid.width and 0 <= new_y < self.model.grid.height:
+            # Check if the new position is available (no other agents present)
+            
+            self.model.grid.move_agent(self, (new_x, new_y))
 
     def step(self):
         """ 
@@ -45,7 +41,7 @@ class Traffic_Light(Agent):
     """
     Traffic light. Where the traffic lights are in the grid.
     """
-    def __init__(self, unique_id, model, state = False, timeToChange = 10):
+    def __init__(self, unique_id, model, state = False, timeToChange = 10, direction = "Left"):
         super().__init__(unique_id, model)
         """
         Creates a new Traffic light.
@@ -59,13 +55,10 @@ class Traffic_Light(Agent):
         self.timeToChange = timeToChange
         self.name = "Traffic Light"
         self.availability = True
+        self.direction = direction
 
     def step(self):
-        """ 
-        To change the state (green or red) of the traffic light in case you consider the time to change of each traffic light.
-        """
-        if self.model.schedule.steps % self.timeToChange == 0:
-            self.state = not self.state
+        pass
 
 class Destination(Agent):
     """
@@ -91,7 +84,7 @@ class Obstacle(Agent):
     def step(self):
         pass
 
-class Road(Agent):
+class RoadUp(Agent):
     """
     Road agent. Determines where the cars can move, and in which direction.
     """
@@ -105,7 +98,65 @@ class Road(Agent):
         """
         super().__init__(unique_id, model)
         self.direction = direction
-        self.name = "Road"
+        self.name = "RoadUp"
+        self.availability = True
+
+    def step(self):
+        pass
+
+class RoadDown(Agent):
+    """
+    Road agent. Determines where the cars can move, and in which direction.
+    """
+    def __init__(self, unique_id, model, direction= "Left"):
+        """
+        Creates a new road.
+        Args:
+            unique_id: The agent's ID
+            model: Model reference for the agent
+            direction: Direction where the cars can move
+        """
+        super().__init__(unique_id, model)
+        self.direction = direction
+        self.name = "RoadDown"
+        self.availability = True
+
+    def step(self):
+        pass
+class RoadLeft(Agent):
+    """
+    Road agent. Determines where the cars can move, and in which direction.
+    """
+    def __init__(self, unique_id, model, direction= "Left"):
+        """
+        Creates a new road.
+        Args:
+            unique_id: The agent's ID
+            model: Model reference for the agent
+            direction: Direction where the cars can move
+        """
+        super().__init__(unique_id, model)
+        self.direction = direction
+        self.name = "RoadLeft"
+        self.availability = True
+
+    def step(self):
+        pass
+class RoadRight(Agent):
+    """
+    Road agent. Determines where the cars can move, and in which direction.
+    """
+    def __init__(self, unique_id, model, direction= "Left"):
+        """
+        Creates a new road.
+        Args:
+            unique_id: The agent's ID
+            model: Model reference for the agent
+            direction: Direction where the cars can move
+        """
+        super().__init__(unique_id, model)
+        self.direction = direction
+        self.name = "RoadRight"
         self.availability = True
 
     def step(self):

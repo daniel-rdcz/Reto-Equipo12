@@ -13,6 +13,10 @@ class CityModel(Model):
     """
     def __init__(self, N):
 
+
+        self.num_agents = N
+        self.running = True
+
         # Load the map dictionary. The dictionary maps the characters in the map file to the corresponding agent.
         dataDictionary = json.load(open("city_files/mapDictionary.json"))
 
@@ -35,7 +39,13 @@ class CityModel(Model):
                         self.grid.place_agent(agent, (c, self.height - r - 1))
 
                     elif col in ["S", "s"]:
-                        agent = Traffic_Light(f"tl_{r*self.width+c}", self, False if col == "S" else True, int(dataDictionary[col]))
+                        # Ahora el estado inicial es un array de tres elementos booleanos
+                        if col == "S":
+                            state = "green"  # Primer elemento True para verde
+                        elif col == "s":
+                            state = "red"  # Tercer elemento True para rojo
+
+                        agent = Traffic_Light(f"tl_{r*self.width+c}", self, state, int(dataDictionary[col]))
                         self.grid.place_agent(agent, (c, self.height - r - 1))
                         self.schedule.add(agent)
                         self.traffic_lights.append(agent)
@@ -48,13 +58,12 @@ class CityModel(Model):
                         agent = Destination(f"d_{r*self.width+c}", self)
                         self.grid.place_agent(agent, (c, self.height - r - 1))
 
-        for i in range(5):
+        for i in range(self.num_agents):
             agent = Car(f"c_{i}", self)
             self.schedule.add(agent)
             self.grid.place_agent(agent, (i, 0))
 
-        self.num_agents = N
-        self.running = True
+        
 
     def step(self):
         '''Advance the model by one step.'''

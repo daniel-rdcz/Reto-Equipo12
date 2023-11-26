@@ -13,6 +13,10 @@ class CityModel(Model):
     """
     def __init__(self, N):
 
+
+        self.num_agents = N
+        self.running = True
+
         # Load the map dictionary. The dictionary maps the characters in the map file to the corresponding agent.
         dataDictionary = json.load(open("city_files/mapDictionary.json"))
 
@@ -56,6 +60,7 @@ class CityModel(Model):
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': False, 'E': False, 'W': True}
                         elif col == "»":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': False, 'E': True, 'W': False}
+
                         self.grid.place_agent(agent, (c, self.height - r - 1))
                         self.schedule.add(agent)
                         self.traffic_lights.append(agent)
@@ -83,8 +88,7 @@ class CityModel(Model):
             self.schedule.add(agent)
             self.grid.place_agent(agent, (i, 0))
 
-        self.num_agents = N
-        self.running = True
+        
 
     def step(self):
         '''Advance the model by one step.'''

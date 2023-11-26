@@ -24,7 +24,7 @@ class Car(Agent):
 
     def move(self):
         """ 
-        Determines if the agent can move in the direction that was chosen
+        Moves the agent in the positive x direction by 1 unit.
         """
         """possible_steps = [x for x  in self.model.grid.get_neighborhood(self.pos, moore=True, include_center=True)]
         new_steps = []
@@ -152,7 +152,7 @@ class Traffic_Light(Agent):
     """
     Traffic light. Where the traffic lights are in the grid.
     """
-    def __init__(self, unique_id, model, state = False, timeToChange = 10):
+    def __init__(self, unique_id, model, state = "green", timeToChange = 10):
         super().__init__(unique_id, model)
         """
         Creates a new Traffic light.
@@ -192,7 +192,10 @@ class Traffic_Light(Agent):
         To change the state (green or red) of the traffic light in case you consider the time to change of each traffic light.
         """
         if self.model.schedule.steps % self.timeToChange == 0:
-            self.state = not self.state
+            if self.state == "green":
+                self.state = "red"
+            else:
+                self.state = "green"
 
 class Destination(Agent):
     """

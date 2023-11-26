@@ -12,6 +12,8 @@ using UnityEngine;
 public class ApplyTransforms : MonoBehaviour
 {
     public Vector3 displacement;
+
+    public Vector3 direction;
     [SerializeField] float angle;
     [SerializeField] AXIS rotationAxis;
     [SerializeField] GameObject wheelPrefab;
@@ -24,6 +26,8 @@ public class ApplyTransforms : MonoBehaviour
     Vector3[][] baseVerticesWheel;
     Vector3[][] newVerticesWheel;
     Vector3[] wheelCoordinates;
+
+
 
     // Start is called before the first frame update
     void Start()
@@ -52,10 +56,10 @@ public class ApplyTransforms : MonoBehaviour
         }
 
         wheelCoordinates = new Vector3[numWheels];
-        wheelCoordinates[0] = new Vector3(0.25f, 0.0f, 0.3f);
-        wheelCoordinates[1] = new Vector3(-0.25f, 0.0f, 0.3f);
-        wheelCoordinates[2] = new Vector3(0.25f, 0.0f, -0.3f);
-        wheelCoordinates[3] = new Vector3(-0.25f, 0.0f, -0.3f);
+        wheelCoordinates[0] = new Vector3(0.194999993f,0.0680000037f,-0.279000014f);
+        wheelCoordinates[1] = new Vector3(-0.194999993f,0.0680000037f,-0.279000014f);
+        wheelCoordinates[2] = new Vector3(0.194999993f,0.0680000037f,0.278800011f);
+        wheelCoordinates[3] = new Vector3(-0.195899993f,0.0680000037f,0.278800011f);
     }
 
     // Update is called once per frame
@@ -67,20 +71,19 @@ public class ApplyTransforms : MonoBehaviour
     void DoTransform()
     {
         // Matrix Resize
-        Matrix4x4 resize = HW_Transforms.ScaleMat(0.4f, 0.2f, 0.6f);
-        Matrix4x4 resize_wheels  = HW_Transforms.ScaleMat(0.2f, 0.2f, 0.2f);
+        Matrix4x4 resize_wheels  = HW_Transforms.ScaleMat(0.12f, 0.12f, 0.12f);
         // A matrix to move the object
-        Matrix4x4 move = HW_Transforms.TranslationMat(displacement.x * Time.time,
-                                                      displacement.y * Time.time,
-                                                      displacement.z * Time.time);
+        Matrix4x4 move = HW_Transforms.TranslationMat(displacement.x,
+                                                      displacement.y,
+                                                      displacement.z);
 
-        Matrix4x4 spinWheels = HW_Transforms.RotateMat(-20 * Time.time,
-                                                       AXIS.X);
+        float spinAngle = -160 * direction.magnitude;
+        Matrix4x4 spinWheels = HW_Transforms.RotateMat(spinAngle,
+                                                 AXIS.X);
         
         // Calculate displacement
 
-        float rotateAngle = Mathf.Atan2(displacement.z, displacement.x) * Mathf.Rad2Deg - 90;
-        Debug.Log(rotateAngle);
+        float rotateAngle = Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg - 270;
         Matrix4x4 rotateObject = HW_Transforms.RotateMat(rotateAngle,
                                                          AXIS.Y);
 
@@ -88,7 +91,7 @@ public class ApplyTransforms : MonoBehaviour
         // Rotate around a pivot point
         //Matrix4x4 composite = moveObject * rotate * moveOrigin;
         // Roll and move as a wheel
-        Matrix4x4 compositeCar = move * rotateObject* resize ;
+        Matrix4x4 compositeCar = move * rotateObject;
 
         // Multiply each vertex in the mesh by the composite matrix
         for (int i=0; i<newVertices.Length; i++) {
@@ -113,11 +116,13 @@ public class ApplyTransforms : MonoBehaviour
             }
             meshWheel[v].vertices = newVerticesWheel[v];
             meshWheel[v].RecalculateNormals();
+            meshWheel[v].RecalculateBounds();
         }
 
         // Replace the vertices in the mesh
         mesh.vertices = newVertices;
         // Make sure the normals are adapted to the new vertex positions
         mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
     }
 }

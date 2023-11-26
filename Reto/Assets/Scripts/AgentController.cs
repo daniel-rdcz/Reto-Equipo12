@@ -1,4 +1,4 @@
-﻿// TC2008B. Sistemas Multiagentes y Gráficas Computacionales
+﻿﻿// TC2008B. Sistemas Multiagentes y Gráficas Computacionales
 // C# client to interact with Python. Based on the code provided by Sergio Ruiz.
 // Octavio Navarro. October 2023
 
@@ -24,12 +24,15 @@ public class AgentData
     public string id;
     public float x, y, z;
 
-    public AgentData(string id, float x, float y, float z)
+    public float direction;
+
+    public AgentData(string id, float x, float y, float z, float direction)
     {
         this.id = id;
         this.x = x;
         this.y = y;
         this.z = z;
+        this.direction = direction;
     }
 }
 
@@ -56,18 +59,15 @@ public class AgentController : MonoBehaviour
     Attributes:
         serverUrl (string): The url of the server.
         getAgentsEndpoint (string): The endpoint to get the agents data.
-        getObstaclesEndpoint (string): The endpoint to get the obstacles data.
         sendConfigEndpoint (string): The endpoint to send the configuration.
         updateEndpoint (string): The endpoint to update the simulation.
         agentsData (AgentsData): The data of the agents.
-        obstacleData (AgentsData): The data of the obstacles.
         agents (Dictionary<string, GameObject>): A dictionary of the agents.
         prevPositions (Dictionary<string, Vector3>): A dictionary of the previous positions of the agents.
         currPositions (Dictionary<string, Vector3>): A dictionary of the current positions of the agents.
         updated (bool): A boolean to know if the simulation has been updated.
         started (bool): A boolean to know if the simulation has started.
         agentPrefab (GameObject): The prefab of the agents.
-        obstaclePrefab (GameObject): The prefab of the obstacles.
         floor (GameObject): The floor of the simulation.
         NAgents (int): The number of agents.
         width (int): The width of the simulation.
@@ -78,16 +78,19 @@ public class AgentController : MonoBehaviour
     */
     string serverUrl = "http://localhost:8585";
     string getAgentsEndpoint = "/getAgents";
-    string getObstaclesEndpoint = "/getObstacles";
+    string getTrafficLightEndpoint = "/getTrafficLight";
     string sendConfigEndpoint = "/init";
     string updateEndpoint = "/update";
-    AgentsData agentsData, obstacleData;
+    AgentsData agentsData, trafficLightData;
     Dictionary<string, GameObject> agents;
-    Dictionary<string, Vector3> prevPositions, currPositions;
+    Dictionary<string, GameObject> trafficLights;
+    Dictionary<string, Vector3> prevPositions, currPositions, trafficLightPositions;
+
+    Dictionary<string, float> trafficLightDirections;
 
     bool updated = false, started = false;
 
-    public GameObject agentPrefab, obstaclePrefab, floor;
+    public GameObject agentPrefab, trafficLightPrefab, floor;
     public int NAgents, width, height;
     public float timeToUpdate = 5.0f;
     private float timer, dt;
@@ -95,12 +98,16 @@ public class AgentController : MonoBehaviour
     void Start()
     {
         agentsData = new AgentsData();
-        obstacleData = new AgentsData();
+        trafficLightData = new AgentsData();
 
         prevPositions = new Dictionary<string, Vector3>();
         currPositions = new Dictionary<string, Vector3>();
 
+        trafficLightPositions = new Dictionary<string, Vector3>();
+        trafficLightDirections = new Dictionary<string, float>();
+
         agents = new Dictionary<string, GameObject>();
+        trafficLights = new Dictionary<string, GameObject>();
 
         floor.transform.localScale = new Vector3((float)width/10, 1, (float)height/10);
         floor.transform.localPosition = new Vector3((float)width/2-0.5f, 0, (float)height/2-0.5f);
@@ -135,8 +142,14 @@ public class AgentController : MonoBehaviour
                 Vector3 interpolated = Vector3.Lerp(previousPosition, currentPosition, dt);
                 Vector3 direction = currentPosition - interpolated;
 
-                agents[agent.Key].transform.localPosition = interpolated;
-                if(direction != Vector3.zero) agents[agent.Key].transform.rotation = Quaternion.LookRotation(direction);
+                agents[agent.Key].GetComponent<ApplyTransforms>().displacement = interpolated;
+                agents[agent.Key].GetComponent<ApplyTransforms>().direction = direction;
+            }
+
+            
+            foreach(var trafficLight in trafficLightPositions)
+            {
+                trafficLights[trafficLight.Key].GetComponent<Semaforo>().direction = (float)trafficLightDirections[trafficLight.Key];
             }
 
             // float t = (timer / timeToUpdate);
@@ -154,6 +167,7 @@ public class AgentController : MonoBehaviour
         else 
         {
             StartCoroutine(GetAgentsData());
+            
         }
     }
 
@@ -186,7 +200,7 @@ public class AgentController : MonoBehaviour
 
             // Once the configuration has been sent, it launches a coroutine to get the agents data.
             StartCoroutine(GetAgentsData());
-            StartCoroutine(GetObstacleData());
+            StartCoroutine(GetTrafficLight());
         }
     }
 
@@ -228,23 +242,24 @@ public class AgentController : MonoBehaviour
         }
     }
 
-    IEnumerator GetObstacleData() 
+    IEnumerator GetTrafficLight() 
     {
-        UnityWebRequest www = UnityWebRequest.Get(serverUrl + getObstaclesEndpoint);
+        UnityWebRequest www = UnityWebRequest.Get(serverUrl + getTrafficLightEndpoint);
         yield return www.SendWebRequest();
  
         if (www.result != UnityWebRequest.Result.Success)
             Debug.Log(www.error);
         else 
         {
-            obstacleData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
+            trafficLightData = JsonUtility.FromJson<AgentsData>(www.downloadHandler.text);
 
-            Debug.Log(obstacleData.positions);
-
-            foreach(AgentData obstacle in obstacleData.positions)
+            foreach(AgentData trafficLight in trafficLightData.positions)
             {
-                Instantiate(obstaclePrefab, new Vector3(obstacle.x, obstacle.y, obstacle.z), Quaternion.identity);
+                trafficLightPositions[trafficLight.id] = new Vector3(trafficLight.x, trafficLight.y, trafficLight.z);
+                trafficLightDirections[trafficLight.id] = (float)trafficLight.direction;
+                trafficLights[trafficLight.id] = Instantiate(trafficLightPrefab, new Vector3(trafficLight.x, trafficLight.y, trafficLight.z), Quaternion.identity);
             }
+            
         }
     }
 }

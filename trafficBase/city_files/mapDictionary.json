@@ -1,10 +1,12 @@
 {
-    ">" : "Right",
-    "<" : "Left",
-    "S" : 15,
-    "s" : 7,
-    "#" : "Obstacle",
-    "v" : "Down",
-    "^" : "Up",
-    "D" : "Destination"
+  ">": "Right",
+  "<": "Left",
+  "◊": 7,
+  "∆": 15,
+  "«": 7,
+  "»": 15,
+  "#": "Obstacle",
+  "v": "Down",
+  "^": "Up",
+  "D": "Destination"
 }

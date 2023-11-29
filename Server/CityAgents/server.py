@@ -44,7 +44,6 @@ def getTrafficLight():
         trafficLightPositions = [{"id": str(a.unique_id), "x": x, "y":0, "z":z, "state":a.state, "direction":a.direction}
                           for a_list, (x, z) in cityModel.grid.coord_iter()
                           for a in a_list if isinstance(a, Traffic_Light)]
-
         return jsonify({'positions':trafficLightPositions})
 
 @app.route('/update', methods=['GET'])

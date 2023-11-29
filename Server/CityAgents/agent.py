@@ -223,7 +223,7 @@ class Traffic_Light(Agent):
     """
     Traffic light. Where the traffic lights are in the grid.
     """
-    def __init__(self, unique_id, model, state = False, timeToChange = 10):
+    def __init__(self, unique_id, model, state = False, timeToChange = 10, direction = ""):
         super().__init__(unique_id, model)
         """
         Creates a new Traffic light.
@@ -238,6 +238,15 @@ class Traffic_Light(Agent):
         self.name = "Traffic Light"
         self.availability = True
         self.timeToChange = timeToChange
+        
+        if direction == "u":
+            self.direction = 90
+        elif direction == "n":
+            self.direction = 270
+        elif direction == "L":
+            self.direction = 180
+        elif direction == "R":
+            self.direction = 0
     
     def changeColor(self):
         def is_cross_adjacent(a, b):

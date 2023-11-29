@@ -26,6 +26,8 @@ public class AgentData
 
     public float direction;
 
+    public bool state;
+
     public AgentData(string id, float x, float y, float z, float direction)
     {
         this.id = id;
@@ -33,6 +35,7 @@ public class AgentData
         this.y = y;
         this.z = z;
         this.direction = direction;
+        this.state = false;
     }
 }
 
@@ -88,6 +91,8 @@ public class AgentController : MonoBehaviour
 
     Dictionary<string, float> trafficLightDirections;
 
+    Dictionary<string, bool> trafficLightColor;
+
     bool updated = false, started = false;
 
     public GameObject agentPrefab, trafficLightPrefab, floor;
@@ -105,6 +110,7 @@ public class AgentController : MonoBehaviour
 
         trafficLightPositions = new Dictionary<string, Vector3>();
         trafficLightDirections = new Dictionary<string, float>();
+        trafficLightColor = new Dictionary<string, bool>();
 
         agents = new Dictionary<string, GameObject>();
         trafficLights = new Dictionary<string, GameObject>();
@@ -140,16 +146,18 @@ public class AgentController : MonoBehaviour
                 Vector3 previousPosition = prevPositions[agent.Key];
 
                 Vector3 interpolated = Vector3.Lerp(previousPosition, currentPosition, dt);
-                Vector3 direction = currentPosition - interpolated;
+                Vector3 direction = currentPosition - previousPosition;
 
                 agents[agent.Key].GetComponent<ApplyTransforms>().displacement = interpolated;
-                agents[agent.Key].GetComponent<ApplyTransforms>().direction = direction;
+                if(currentPosition != previousPosition)
+                    agents[agent.Key].GetComponent<ApplyTransforms>().direction = direction;
             }
 
             
             foreach(var trafficLight in trafficLightPositions)
             {
                 trafficLights[trafficLight.Key].GetComponent<Semaforo>().direction = (float)trafficLightDirections[trafficLight.Key];
+                trafficLights[trafficLight.Key].GetComponent<Semaforo>().color = trafficLightColor[trafficLight.Key];
             }
 
             // float t = (timer / timeToUpdate);
@@ -167,7 +175,7 @@ public class AgentController : MonoBehaviour
         else 
         {
             StartCoroutine(GetAgentsData());
-            
+            StartCoroutine(GetTrafficLight());
         }
     }
 
@@ -223,11 +231,10 @@ public class AgentController : MonoBehaviour
             {
                 Vector3 newAgentPosition = new Vector3(agent.x, agent.y, agent.z);
 
-                    if(!started)
+                    if(!agents.ContainsKey(agent.id))
                     {
-                        
                         prevPositions[agent.id] = newAgentPosition;
-                        agents[agent.id] = Instantiate(agentPrefab, newAgentPosition, Quaternion.identity);
+                        agents[agent.id] = Instantiate(agentPrefab, Vector3.zero, Quaternion.identity);
                     }
                     else
                     {
@@ -258,7 +265,9 @@ public class AgentController : MonoBehaviour
             {
                 trafficLightPositions[trafficLight.id] = new Vector3(trafficLight.x, trafficLight.y, trafficLight.z);
                 trafficLightDirections[trafficLight.id] = (float)trafficLight.direction;
-                trafficLights[trafficLight.id] = Instantiate(trafficLightPrefab, new Vector3(trafficLight.x, trafficLight.y, trafficLight.z), Quaternion.identity);
+                trafficLightColor[trafficLight.id] = trafficLight.state;
+                if(!trafficLights.ContainsKey(trafficLight.id))
+                    trafficLights[trafficLight.id] = Instantiate(trafficLightPrefab, new Vector3(trafficLight.x, trafficLight.y, trafficLight.z), Quaternion.identity);
             }
             
         }

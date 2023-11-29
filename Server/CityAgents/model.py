@@ -54,7 +54,7 @@ class CityModel(Model):
 
 
                     elif col in ["u", "n", "L", "R"]:
-                        agent = Traffic_Light(f"tl_{r*self.width+c}", self, False if col in ["n", "L"] else True, int(dataDictionary[col]))
+                        agent = Traffic_Light(f"tl_{r*self.width+c}", self, False if col in ["n", "L"] else True, int(dataDictionary[col]), col)
                         if col == "u":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': True, 'E': False, 'W': False}
                         elif col == "n":

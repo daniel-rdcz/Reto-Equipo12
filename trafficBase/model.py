@@ -12,7 +12,9 @@ class CityModel(Model):
             N: Number of agents in the simulation
     """
     def __init__(self, N):
-
+        self.num_agents = N
+        self.running = True
+        
         # Load the map dictionary. The dictionary maps the characters in the map file to the corresponding agent.
         dataDictionary = json.load(open("city_files/mapDictionary.json"))
 
@@ -77,17 +79,13 @@ class CityModel(Model):
                         self.schedule.add(agent)
                         self.destinations.append((c, self.height - r - 1))
 
-
-        self.num_agents = N
-        self.running = True
-
     def step(self):
         '''Advance the model by one step.'''
         self.schedule.steps
         self.locations_wo_cars = list(self.grid_Map.keys())
         self.step_count += 1
         if self.schedule.steps % 10 == 0:
-            for i in range(17):
+            for i in range(1):
                 position = random.choice(self.locations_wo_cars)
                 
                 agent = Car(f"c_{self.step_count}_*{i}", self)

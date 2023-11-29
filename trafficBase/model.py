@@ -2,7 +2,7 @@ from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
 from agent import *
-import json, random
+import json, random, os
 
 class CityModel(Model):
     """ 
@@ -13,17 +13,17 @@ class CityModel(Model):
     """
     def __init__(self, N):
 
-
-        self.num_agents = N
-        self.running = True
-
         # Load the map dictionary. The dictionary maps the characters in the map file to the corresponding agent.
+        current_dir = os.path.dirname(os.path.realpath(__file__))
         dataDictionary = json.load(open("city_files/mapDictionary.json"))
 
         self.traffic_lights = []
         self.destinations = []
         self.obstacles = []
         self.grid_Map= {}
+        self.locations_wo_cars = []
+        self.step_count = 0
+        self.car_agents = 0
         # Load the map file. The map file is a text file where each character represents an agent.
         with open('city_files/2022_base.txt') as baseFile:
             lines = baseFile.readlines()
@@ -60,7 +60,6 @@ class CityModel(Model):
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': False, 'E': False, 'W': True}
                         elif col == "»":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': False, 'E': True, 'W': False}
-
                         self.grid.place_agent(agent, (c, self.height - r - 1))
                         self.schedule.add(agent)
                         self.traffic_lights.append(agent)
@@ -75,21 +74,27 @@ class CityModel(Model):
                         agent = Destination(f"d_{r*self.width+c}", self)
                         self.grid_Map[(c,self.height - r - 1)] = {'N': True, 'S': True, 'E': True, 'W': True}
                         key = (c,self.height - r - 1)
-                        print('destination: ',key)
                         self.grid.place_agent(agent, (c, self.height - r - 1))
                         self.schedule.add(agent)
                         self.destinations.append((c, self.height - r - 1))
 
 
-        for i in range(N):
-            agent = Car(f"c_{i}", self)
-            agent.grid_Map = self.grid_Map
-            agent.destination = random.choice(self.destinations)
-            self.schedule.add(agent)
-            self.grid.place_agent(agent, (i, 0))
-
-        
+        self.num_agents = N
+        self.running = True
 
     def step(self):
         '''Advance the model by one step.'''
+        self.schedule.steps
+        self.locations_wo_cars = list(self.grid_Map.keys())
+        self.step_count += 1
+        if self.schedule.steps % 10 == 0:
+            for i in range(17):
+                position = random.choice(self.locations_wo_cars)
+                
+                agent = Car(f"c_{self.step_count}_*{i}", self)
+                agent.grid_Map = self.grid_Map
+                agent.destination = random.choice(self.destinations)
+                self.locations_wo_cars.remove(position)
+                self.schedule.add(agent)
+                self.grid.place_agent(agent, position)
         self.schedule.step()

@@ -3,7 +3,7 @@ from model import CityModel
 from agent import *
 
 # Size of the board:
-number_agents = 10
+number_agents = 20
 width = 24
 height = 25
 cityModel = None

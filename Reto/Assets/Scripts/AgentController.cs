@@ -225,6 +225,7 @@ public class AgentController : MonoBehaviour
 
                     if(!started)
                     {
+                        
                         prevPositions[agent.id] = newAgentPosition;
                         agents[agent.id] = Instantiate(agentPrefab, newAgentPosition, Quaternion.identity);
                     }

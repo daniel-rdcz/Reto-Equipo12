@@ -2,7 +2,7 @@ from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
 from agent import *
-import json, random, os
+import json, random
 
 class CityModel(Model):
     """ 
@@ -14,7 +14,6 @@ class CityModel(Model):
     def __init__(self, N):
 
         # Load the map dictionary. The dictionary maps the characters in the map file to the corresponding agent.
-        current_dir = os.path.dirname(os.path.realpath(__file__))
         dataDictionary = json.load(open("city_files/mapDictionary.json"))
 
         self.traffic_lights = []
@@ -50,15 +49,16 @@ class CityModel(Model):
                             self.grid_Map[(c,self.height - r - 1)] = {'N': True, 'S': True, 'E': True, 'W': True}
                         self.grid.place_agent(agent, (c, self.height - r - 1))
 
-                    elif col in ["◊", "∆", "«", "»"]:
-                        agent = Traffic_Light(f"tl_{r*self.width+c}", self, False if col in ["∆", "«"] else True, int(dataDictionary[col]))
-                        if col == "◊":
+
+                    elif col in ["u", "n", "L", "R"]:
+                        agent = Traffic_Light(f"tl_{r*self.width+c}", self, False if col in ["n", "L"] else True, int(dataDictionary[col]))
+                        if col == "u":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': True, 'E': False, 'W': False}
-                        elif col == "∆":
+                        elif col == "n":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': True, 'S': False, 'E': False, 'W': False}
-                        elif col == "«":
+                        elif col == "L":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': False, 'E': False, 'W': True}
-                        elif col == "»":
+                        elif col == "R":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': False, 'E': True, 'W': False}
                         self.grid.place_agent(agent, (c, self.height - r - 1))
                         self.schedule.add(agent)
@@ -69,7 +69,6 @@ class CityModel(Model):
                         position = [c, self.height - r - 1]
                         self.obstacles.append(position)
                         self.grid.place_agent(agent, (c, self.height - r - 1))
-
                     elif col == "D":
                         agent = Destination(f"d_{r*self.width+c}", self)
                         self.grid_Map[(c,self.height - r - 1)] = {'N': True, 'S': True, 'E': True, 'W': True}

@@ -215,7 +215,7 @@ class Car(Agent):
         if self.pos == self.destination:
             self.model.grid.remove_agent(self)
             self.model.schedule.remove(self)
-            self.model.num_agents -= 1
+            self.model.num_agents -= 1 
             return
         self.move()
 

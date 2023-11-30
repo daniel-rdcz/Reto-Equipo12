@@ -24,6 +24,8 @@ public class AgentData
     public string id;
     public float x, y, z;
 
+    public Vector3 destination;
+
     public float direction;
 
     public bool state;
@@ -230,6 +232,7 @@ public class AgentController : MonoBehaviour
             foreach(AgentData agent in agentsData.positions)
             {
                 Vector3 newAgentPosition = new Vector3(agent.x, agent.y, agent.z);
+                Vector3 agentDirection = agent.destination;
 
                     if(!agents.ContainsKey(agent.id))
                     {
@@ -242,8 +245,26 @@ public class AgentController : MonoBehaviour
                         if(currPositions.TryGetValue(agent.id, out currentPosition))
                             prevPositions[agent.id] = currentPosition;
                         currPositions[agent.id] = newAgentPosition;
+
+                        if(newAgentPosition == agent.destination)
+                        {
+                            GameObject gameObjectToDestroy = agents[agent.id];
+
+                            // Destruye todos los hijos del GameObject
+                            foreach (Transform child in gameObjectToDestroy.transform)
+                            {
+                                Destroy(child.gameObject);
+                            }
+
+                            // Ahora puedes destruir el GameObject principal si es necesario
+                            Destroy(gameObjectToDestroy);
+                            agents.Remove(agent.id);
+                            prevPositions.Remove(agent.id);
+                            currPositions.Remove(agent.id);
+                        }
                     }
             }
+            
 
             updated = true;
             if(!started) started = true;

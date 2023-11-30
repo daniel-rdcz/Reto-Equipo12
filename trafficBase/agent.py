@@ -183,12 +183,12 @@ class Car(Agent):
                         self.model.grid.move_agent(self, new_moves[1])
                         self.path = new_moves[2:]
                 else:
-                    #print('FORCED')
-                    force_move(self.pos, self.grid_Map)
+                    print('FORCED Disabled: No local proactivity')
+                    #force_move(self.pos, self.grid_Map)
             else:
                 print('No path found to: ', self.destination)
-                print(len(self.grid_Map))
-                force_move(self.pos, self.grid_Map)
+                print('FORCED Disabled: No local proactivity')
+                #force_move(self.pos, self.grid_Map)
         except:
             pass
         """for tries in range(3):

@@ -25,6 +25,9 @@ class CityModel(Model):
         self.step_count = 0
         self.car_agents = 0
         self.destroyed_cars = 0
+
+        self.switch_mode = False
+  
         # Load the map file. The map file is a text file where each character represents an agent.
         with open('city_files/2022_base.txt') as baseFile:
             lines = baseFile.readlines()
@@ -104,13 +107,29 @@ class CityModel(Model):
         #print(len(clean_car_grid))
         if percentage_of_occupied_grid(clean_car_grid) <= 99:
             if self.step_count % 10 == 0:
-                for i in range(20):
-                    position = random.choice(clean_car_grid)
-                    if car_not_in_pos(position) == True:
-                        agent = Car(f"c_{self.step_count}_*{i}", self)
-                        agent.grid_Map = self.grid_Map
-                        agent.destination = random.choice(self.destinations)
-                        self.schedule.add(agent)
-                        self.grid.place_agent(agent, position)
+                if self.switch_mode == False:
+                    attempt_counter = 0
+                    corner_coordinates = [(0,0), (0, self.height-1), (self.width-1, 0), (self.width-1, self.height-1)]
+                    for i in range(4):
+                        position = corner_coordinates[i]
+                        if car_not_in_pos(position) == True:
+                            agent = Car(f"c_{self.step_count}_*{i}", self)
+                            agent.grid_Map = self.grid_Map
+                            agent.destination = random.choice(self.destinations)
+                            self.schedule.add(agent)
+                            self.grid.place_agent(agent, position)
+                            attempt_counter += 1
+                        if attempt_counter == 0:
+                            self.switch_mode = True
+                            print("4 corner mode deactivated, entering random mode")
+                else:
+                    for i in range(20):
+                        position = random.choice(clean_car_grid)
+                        if car_not_in_pos(position) == True:
+                            agent = Car(f"c_{self.step_count}_*{i}", self)
+                            agent.grid_Map = self.grid_Map
+                            agent.destination = random.choice(self.destinations)
+                            self.schedule.add(agent)
+
         print(self.destroyed_cars)
         self.schedule.step()

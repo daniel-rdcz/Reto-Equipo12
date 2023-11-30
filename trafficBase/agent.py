@@ -87,6 +87,7 @@ class Car(Agent):
         def is_in_cross(a, b):
             return a[0] == b[0] or a[1] == b[1]
 
+
         def aStar_path(grid, start, goal):
             g_score = {cell:float('inf') for cell in grid}
             f_score = {cell:float('inf') for cell in grid}
@@ -183,36 +184,16 @@ class Car(Agent):
                         self.model.grid.move_agent(self, new_moves[1])
                         self.path = new_moves[2:]
                 else:
-                    print('FORCED Disabled: No local proactivity')
-                    #force_move(self.pos, self.grid_Map)
+                    pass
+                    #print('FORCED Disabled: No local proactivity')
+                    force_move(self.pos, self.grid_Map)
             else:
+                pass
                 print('No path found to: ', self.destination)
-                print('FORCED Disabled: No local proactivity')
-                #force_move(self.pos, self.grid_Map)
+                #print('FORCED Disabled: No local proactivity')
+                force_move(self.pos, self.grid_Map)
         except:
             pass
-        """for tries in range(3):
-            if tries == 2:
-                new_move = self.path[0]
-                if car_in_next_cell(new_move) == False:
-                    if green_light(new_move) == True:
-                        self.model.grid.move_agent(self, new_move)
-                        self.path.pop(0)
-                        break
-            next_move = aStar_path(grid_tries, self.pos, self.destination)
-            if next_move == None:
-                break
-            if car_in_next_cell(next_move[1]) == True:
-                grid_tries.pop(next_move[1])
-
-            if green_light(next_move[1]) == False:
-                grid_tries.pop(next_move[1])
-
-            if car_in_next_cell(next_move[1]) == False:
-                if green_light(next_move[1]) == True:
-                    self.path = next_move[2:]
-                    self.model.grid.move_agent(self, next_move[1])
-                    break"""
 
     def step(self):
         """ 

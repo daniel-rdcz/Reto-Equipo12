@@ -2,7 +2,7 @@ from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
 from agent import *
-import json, random, os
+import json, random, os, requests
 
 class CityModel(Model):
     """ 
@@ -52,15 +52,15 @@ class CityModel(Model):
                             self.grid_Map[(c,self.height - r - 1)] = {'N': True, 'S': True, 'E': True, 'W': True}
                         self.grid.place_agent(agent, (c, self.height - r - 1))
 
-                    elif col in ["◊", "∆", "«", "»"]:
-                        agent = Traffic_Light(f"tl_{r*self.width+c}", self, False if col in ["∆", "«"] else True, int(dataDictionary[col]))
-                        if col == "◊":
+                    elif col in ["u", "n", "L", "R"]:
+                        agent = Traffic_Light(f"tl_{r*self.width+c}", self, False if col in ["n", "L"] else True, int(dataDictionary[col]))
+                        if col == "u":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': True, 'E': False, 'W': False}
-                        elif col == "∆":
+                        elif col == "n":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': True, 'S': False, 'E': False, 'W': False}
-                        elif col == "«":
+                        elif col == "L":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': False, 'E': False, 'W': True}
-                        elif col == "»":
+                        elif col == "R":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': False, 'E': True, 'W': False}
                         self.grid.place_agent(agent, (c, self.height - r - 1))
                         self.schedule.add(agent)
@@ -93,9 +93,16 @@ class CityModel(Model):
         def percentage_of_occupied_grid(grid):
             count = 0
             for agent in self.schedule.agents:
-                if agent.name == 'Car' and agent.pos == grid:
+                if agent.name == 'Car':
                     count += 1
             return count/len(grid)*100
+        
+        def cars_count():
+            count = 0
+            for agent in self.schedule.agents:
+                if agent.name == 'Car':
+                    count += 1
+            return count
 
         '''Advance the model by one step.'''
         self.schedule.steps
@@ -104,10 +111,10 @@ class CityModel(Model):
         self.step_count += 1
         #print(len(clean_car_grid))
         if percentage_of_occupied_grid(clean_car_grid) <= 99:
-            if self.step_count % 10 == 0:
+            if self.step_count % 3 == 0:
                 if self.switch_mode == False:
                     attempt_counter = 0
-                    corner_coordinates = [(0,0), (0, self.height-1), (self.width-1, 0), (self.width-1, self.height-1)]
+                    corner_coordinates = [(0,0), (0, 24), (23, 0), (23, 24)]
                     for i in range(4):
                         position = corner_coordinates[i]
                         if car_not_in_pos(position) == True:
@@ -121,13 +128,32 @@ class CityModel(Model):
                             self.switch_mode = True
                             print("4 corner mode deactivated, entering random mode")
                 else:
-                    for i in range(20):
+                    print('bye bye')
+                    self.running = False
+                    """for i in range(10):
                         position = random.choice(clean_car_grid)
                         if car_not_in_pos(position) == True:
                             agent = Car(f"c_{self.step_count}_*{i}", self)
                             agent.grid_Map = self.grid_Map
                             agent.destination = random.choice(self.destinations)
                             self.schedule.add(agent)
-                            self.grid.place_agent(agent, position)
+                            self.grid.place_agent(agent, position)"""
         print(self.destroyed_cars)
+        print(percentage_of_occupied_grid(clean_car_grid))
+        url = "http://52.1.3.19:8585/api/"
+        endpoint = "attempts"
+
+        data = {
+            "year" : 2023,
+            "classroom" : 301,
+            "name" : "Equipo 12",
+            "num_cars": self.destroyed_cars
+        }
+
+        headers = {
+            "Content-Type": "application/json"
+        }
+
+        if self.step_count % 100 == 0:
+            response = requests.post(url+endpoint, data=json.dumps(data), headers=headers)
         self.schedule.step()

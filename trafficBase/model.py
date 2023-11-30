@@ -25,7 +25,9 @@ class CityModel(Model):
         self.step_count = 0
         self.car_agents = 0
         self.destroyed_cars = 0
+
         self.switch_mode = False
+  
         # Load the map file. The map file is a text file where each character represents an agent.
         with open('city_files/2022_base.txt') as baseFile:
             lines = baseFile.readlines()
@@ -51,7 +53,7 @@ class CityModel(Model):
                         elif col == "*":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': True, 'S': True, 'E': True, 'W': True}
                         self.grid.place_agent(agent, (c, self.height - r - 1))
-
+                        
                     elif col in ["u", "n", "L", "R"]:
                         agent = Traffic_Light(f"tl_{r*self.width+c}", self, False if col in ["n", "L"] else True, int(dataDictionary[col]))
                         if col == "u":
@@ -138,6 +140,7 @@ class CityModel(Model):
                             agent.destination = random.choice(self.destinations)
                             self.schedule.add(agent)
                             self.grid.place_agent(agent, position)"""
+                    
         print(self.destroyed_cars)
         print(percentage_of_occupied_grid(clean_car_grid))
         url = "http://52.1.3.19:8585/api/"

@@ -19,3 +19,7 @@ response = requests.post(url+endpoint, data=json.dumps(data), headers=headers)
 
 print("Request " + "successful" if response.status_code == 200 else "failed", "Status code:", response.status_code)
 print("Response:", response.json())
+#print number in random range
+import random
+print(random.randint(-9, 9))
+

@@ -13,9 +13,6 @@ class CityModel(Model):
     """
     def __init__(self, N):
 
-        self.num_agents = N
-        self.running = True
-
         # Load the map dictionary. The dictionary maps the characters in the map file to the corresponding agent.
         dataDictionary = json.load(open("city_files/mapDictionary.json"))
 
@@ -26,6 +23,7 @@ class CityModel(Model):
         self.locations_wo_cars = []
         self.step_count = 0
         self.car_agents = 0
+        self.destroyed_cars = 0
         # Load the map file. The map file is a text file where each character represents an agent.
         with open('city_files/2022_base.txt') as baseFile:
             lines = baseFile.readlines()
@@ -34,6 +32,8 @@ class CityModel(Model):
 
             self.grid = MultiGrid(self.width, self.height, torus = False) 
             self.schedule = RandomActivation(self)
+            self.num_agents = N
+            self.running = True
 
             # Goes through each character in the map file and creates the corresponding agent.
             for r, row in enumerate(lines):
@@ -80,21 +80,35 @@ class CityModel(Model):
                         self.schedule.add(agent)
                         self.destinations.append((c, self.height - r - 1))
 
+        
+
     def step(self):
+        def car_not_in_pos(position):
+            for agent in self.schedule.agents:
+                if agent.name == 'Car' and agent.pos == position:
+                    return False
+            return True
+        def percentage_of_occupied_grid(grid):
+            count = 0
+            for agent in self.schedule.agents:
+                if agent.name == 'Car' and agent.pos == grid:
+                    count += 1
+            return count/len(grid)*100
+
         '''Advance the model by one step.'''
         self.schedule.steps
         self.locations_wo_cars = list(self.grid_Map.keys())
+        clean_car_grid = [x for x in self.locations_wo_cars if x not in self.destinations]
         self.step_count += 1
-        if self.schedule.steps % 10 == 0:
-            for i in range(17):
-                position = random.choice(self.locations_wo_cars)
-                
-                agent = Car(f"c_{self.step_count}_*{i}", self)
-                agent.grid_Map = self.grid_Map
-                agent.destination = random.choice(self.destinations)
-                self.locations_wo_cars.remove(position)
-                self.schedule.add(agent)
-                self.grid.place_agent(agent, position)
+        if percentage_of_occupied_grid(clean_car_grid) <= 99:
+            if self.schedule.steps % 10 == 0:
+                for i in range(20):
+                    position = random.choice(self.locations_wo_cars)
+                    if car_not_in_pos(position) == True:
+                        agent = Car(f"c_{self.step_count}_*{i}", self)
+                        agent.grid_Map = self.grid_Map
+                        agent.destination = random.choice(self.destinations)
+                        self.schedule.add(agent)
+                        self.grid.place_agent(agent, position)
 
-                
         self.schedule.step()

@@ -83,6 +83,9 @@ class Car(Agent):
                 return True
             else:
                 return False
+        
+        def is_in_cross(a, b):
+            return a[0] == b[0] or a[1] == b[1]
 
         def aStar_path(grid, start, goal):
             g_score = {cell:float('inf') for cell in grid}
@@ -137,7 +140,10 @@ class Car(Agent):
                     if temp_g_score < g_score[neighbor]:
                         came_from[neighbor] = current
                         g_score[neighbor] = temp_g_score
-                        f_score[neighbor] = temp_g_score + manhattan_distance(neighbor, goal)
+                        if is_in_cross(neighbor, current):
+                            f_score[neighbor] = temp_g_score + manhattan_distance(neighbor, goal) - 1
+                        else:
+                            f_score[neighbor] = temp_g_score + manhattan_distance(neighbor, goal)
                         if neighbor not in open_set_hash:
                             count += 1
                             open_set.put((f_score[neighbor], count, neighbor))
@@ -177,12 +183,12 @@ class Car(Agent):
                         self.model.grid.move_agent(self, new_moves[1])
                         self.path = new_moves[2:]
                 else:
-                    #print('FORCED')
-                    force_move(self.pos, self.grid_Map)
+                    print('FORCED Disabled: No local proactivity')
+                    #force_move(self.pos, self.grid_Map)
             else:
                 print('No path found to: ', self.destination)
-                print(len(self.grid_Map))
-                force_move(self.pos, self.grid_Map)
+                print('FORCED Disabled: No local proactivity')
+                #force_move(self.pos, self.grid_Map)
         except:
             pass
         """for tries in range(3):
@@ -216,6 +222,7 @@ class Car(Agent):
             self.model.grid.remove_agent(self)
             self.model.schedule.remove(self)
             self.model.num_agents -= 1
+            self.model.destroyed_cars += 1
             return
         self.move()
 

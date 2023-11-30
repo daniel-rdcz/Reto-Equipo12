@@ -25,7 +25,9 @@ class CityModel(Model):
         self.step_count = 0
         self.car_agents = 0
         self.destroyed_cars = 0
+
         self.switch_mode = False
+  
         # Load the map file. The map file is a text file where each character represents an agent.
         with open('city_files/2022_base.txt') as baseFile:
             lines = baseFile.readlines()
@@ -128,6 +130,6 @@ class CityModel(Model):
                             agent.grid_Map = self.grid_Map
                             agent.destination = random.choice(self.destinations)
                             self.schedule.add(agent)
-                            self.grid.place_agent(agent, position)
+
         print(self.destroyed_cars)
         self.schedule.step()

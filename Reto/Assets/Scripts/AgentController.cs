@@ -99,7 +99,7 @@ public class AgentController : MonoBehaviour
 
     public GameObject agentPrefab, trafficLightPrefab, floor;
     public int NAgents, width, height;
-    public float timeToUpdate = 5.0f;
+    public float timeToUpdate;
     private float timer, dt;
 
     void Start()
@@ -128,7 +128,7 @@ public class AgentController : MonoBehaviour
 
     private void Update() 
     {
-        if(timer < 0)
+        if(timer <= 0f)
         {
             timer = timeToUpdate;
             updated = false;
@@ -148,10 +148,10 @@ public class AgentController : MonoBehaviour
                 Vector3 previousPosition = prevPositions[agent.Key];
 
                 Vector3 interpolated = Vector3.Lerp(previousPosition, currentPosition, dt);
-                Vector3 direction = currentPosition - previousPosition;
-
+                Vector3 direction = currentPosition - interpolated;
+                
                 agents[agent.Key].GetComponent<ApplyTransforms>().displacement = interpolated;
-                if(currentPosition != previousPosition)
+                if(currentPosition != previousPosition && direction != Vector3.zero)
                     agents[agent.Key].GetComponent<ApplyTransforms>().direction = direction;
             }
 
@@ -248,28 +248,35 @@ public class AgentController : MonoBehaviour
 
                         if(newAgentPosition == agent.destination)
                         {
-                            GameObject gameObjectToDestroy = agents[agent.id];
-
-                            // Destruye todos los hijos del GameObject
-                            foreach (Transform child in gameObjectToDestroy.transform)
-                            {
-                                Destroy(child.gameObject);
-                            }
-
-                            // Ahora puedes destruir el GameObject principal si es necesario
-                            Destroy(gameObjectToDestroy);
-                            agents.Remove(agent.id);
-                            prevPositions.Remove(agent.id);
-                            currPositions.Remove(agent.id);
+                            StartCoroutine(DestroyAgentAfterAnimation(agent.id));
                         }
                     }
             }
             
 
             updated = true;
-            if(!started) started = true;
         }
     }
+
+    IEnumerator DestroyAgentAfterAnimation(string agentId)
+    {
+        yield return new WaitForSeconds(1f); 
+
+        GameObject gameObjectToDestroy = agents[agentId];
+
+        // Destruye todos los hijos del GameObject
+        foreach (Transform child in gameObjectToDestroy.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        // Ahora puedes destruir el GameObject principal si es necesario
+        Destroy(gameObjectToDestroy);
+        agents.Remove(agentId);
+        prevPositions.Remove(agentId);
+        currPositions.Remove(agentId);
+    }
+
 
     IEnumerator GetTrafficLight() 
     {

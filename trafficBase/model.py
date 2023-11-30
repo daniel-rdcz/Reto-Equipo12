@@ -51,15 +51,16 @@ class CityModel(Model):
                             self.grid_Map[(c,self.height - r - 1)] = {'N': True, 'S': True, 'E': True, 'W': True}
                         self.grid.place_agent(agent, (c, self.height - r - 1))
 
-                    elif col in ["◊", "∆", "«", "»"]:
-                        agent = Traffic_Light(f"tl_{r*self.width+c}", self, False if col in ["∆", "«"] else True, int(dataDictionary[col]))
-                        if col == "◊":
+                    # elif col in ["◊", "∆", "«", "»"]:
+                    elif col in ["u", "n", "L", "R"]:
+                        agent = Traffic_Light(f"tl_{r*self.width+c}", self, False if col in ["n", "L"] else True, int(dataDictionary[col]))
+                        if col == "u":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': True, 'E': False, 'W': False}
-                        elif col == "∆":
+                        elif col == "n":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': True, 'S': False, 'E': False, 'W': False}
-                        elif col == "«":
+                        elif col == "L":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': False, 'E': False, 'W': True}
-                        elif col == "»":
+                        elif col == "R":
                             self.grid_Map[(c,self.height - r - 1)] = {'N': False, 'S': False, 'E': True, 'W': False}
                         self.grid.place_agent(agent, (c, self.height - r - 1))
                         self.schedule.add(agent)

@@ -26,7 +26,6 @@ class CityModel(Model):
         self.car_agents = 0
         self.destroyed_cars = 0
         self.switch_mode = False
-  
         # Load the map file. The map file is a text file where each character represents an agent.
         with open('city_files/2022_base.txt') as baseFile:
             lines = baseFile.readlines()
@@ -132,7 +131,6 @@ class CityModel(Model):
                             self.schedule.add(agent)
                             self.grid.place_agent(agent, position)
                             car_placed += 1"""
-
                     attempt_counter = 0
                     corner_coordinates = [(0,0), (0, 24), (23, 0), (23, 24)]
                     for i in range(4):
@@ -151,15 +149,14 @@ class CityModel(Model):
                 else:
                     print('bye bye')
                     self.running = False
-                    """for i in range(10):
+                    for i in range(10):
                         position = random.choice(clean_car_grid)
                         if car_not_in_pos(position) == True:
                             agent = Car(f"c_{self.step_count}_*{i}", self)
                             agent.grid_Map = self.grid_Map
                             agent.destination = random.choice(self.destinations)
                             self.schedule.add(agent)
-                            self.grid.place_agent(agent, position)"""
-                    
+                            self.grid.place_agent(agent, position)
         print(self.destroyed_cars)
         print(percentage_of_occupied_grid(clean_car_grid))
         url = "http://52.1.3.19:8585/api/"

@@ -1,3 +1,8 @@
+'''
+Enrique Cabrera Aguilar A01652071
+José Daniel Rodríguez Cruz A01781933
+29 de Noviembre del 2023
+'''
 from mesa import Agent
 from queue import PriorityQueue
 
@@ -87,6 +92,7 @@ class Car(Agent):
         def is_in_cross(a, b):
             return a[0] == b[0] or a[1] == b[1]
 
+
         def aStar_path(grid, start, goal):
             g_score = {cell:float('inf') for cell in grid}
             f_score = {cell:float('inf') for cell in grid}
@@ -133,7 +139,6 @@ class Car(Agent):
                             neighbors.append((current[0] - 1, current[1] - 1))
 
                 clean_neighbors = [a for a in neighbors if a in grid_Map_keys]
-                #in_cross_order = sorted(clean_neighbors, key=lambda x: is_in_cross(x, goal))
 
                 for neighbor in clean_neighbors:
                     temp_g_score = g_score[current] + 1
@@ -150,30 +155,31 @@ class Car(Agent):
                             open_set_hash.add(neighbor)
 
         def force_move(current, grid):
-            neighbors = []
-            for d in 'NSEW':
-                if grid[current][d] == True:
-                    if d == 'N':
-                        neighbors.append((current[0], current[1] + 1))
-                        neighbors.append((current[0] + 1, current[1] + 1))
-                        neighbors.append((current[0] - 1, current[1] + 1))
-                    if d == 'S':
-                        neighbors.append((current[0], current[1] - 1))
-                        neighbors.append((current[0] + 1, current[1] - 1))
-                        neighbors.append((current[0] - 1, current[1] - 1))
-                    if d == 'E':
-                        neighbors.append((current[0] + 1, current[1]))
-                        neighbors.append((current[0] + 1, current[1] + 1))
-                        neighbors.append((current[0] + 1, current[1] - 1))
-                    if d == 'W':
-                        neighbors.append((current[0] - 1, current[1]))
-                        neighbors.append((current[0] - 1, current[1] + 1))
-                        neighbors.append((current[0] - 1, current[1] - 1))
-            for neighbor in neighbors:
-                if car_in_next_cell(neighbor) == False:
-                    if green_light(neighbor) == True and neighbor in self.grid_Map:
-                        self.model.grid.move_agent(self, neighbor)
-                        break
+            if random.randint(0,2) == 1:
+                neighbors = []
+                for d in 'NSEW':
+                    if grid[current][d] == True:
+                        if d == 'N':
+                            neighbors.append((current[0], current[1] + 1))
+                            neighbors.append((current[0] + 1, current[1] + 1))
+                            neighbors.append((current[0] - 1, current[1] + 1))
+                        if d == 'S':
+                            neighbors.append((current[0], current[1] - 1))
+                            neighbors.append((current[0] + 1, current[1] - 1))
+                            neighbors.append((current[0] - 1, current[1] - 1))
+                        if d == 'E':
+                            neighbors.append((current[0] + 1, current[1]))
+                            neighbors.append((current[0] + 1, current[1] + 1))
+                            neighbors.append((current[0] + 1, current[1] - 1))
+                        if d == 'W':
+                            neighbors.append((current[0] - 1, current[1]))
+                            neighbors.append((current[0] - 1, current[1] + 1))
+                            neighbors.append((current[0] - 1, current[1] - 1))
+                for neighbor in neighbors:
+                    if car_in_next_cell(neighbor) == False:
+                        if green_light(neighbor) == True and neighbor in self.grid_Map:
+                            self.model.grid.move_agent(self, neighbor)
+                            break
 
         new_moves = aStar_path(self.grid_Map, self.pos, self.destination)
         try:
@@ -183,36 +189,16 @@ class Car(Agent):
                         self.model.grid.move_agent(self, new_moves[1])
                         self.path = new_moves[2:]
                 else:
-                    #print('FORCED')
+                    pass
+                    #print('FORCED Disabled: No local proactivity')
                     force_move(self.pos, self.grid_Map)
             else:
+                pass
                 print('No path found to: ', self.destination)
-                print(len(self.grid_Map))
+                #print('FORCED Disabled: No local proactivity')
                 force_move(self.pos, self.grid_Map)
         except:
             pass
-        """for tries in range(3):
-            if tries == 2:
-                new_move = self.path[0]
-                if car_in_next_cell(new_move) == False:
-                    if green_light(new_move) == True:
-                        self.model.grid.move_agent(self, new_move)
-                        self.path.pop(0)
-                        break
-            next_move = aStar_path(grid_tries, self.pos, self.destination)
-            if next_move == None:
-                break
-            if car_in_next_cell(next_move[1]) == True:
-                grid_tries.pop(next_move[1])
-
-            if green_light(next_move[1]) == False:
-                grid_tries.pop(next_move[1])
-
-            if car_in_next_cell(next_move[1]) == False:
-                if green_light(next_move[1]) == True:
-                    self.path = next_move[2:]
-                    self.model.grid.move_agent(self, next_move[1])
-                    break"""
 
     def step(self):
         """ 
@@ -221,7 +207,7 @@ class Car(Agent):
         if self.pos == self.destination:
             self.model.grid.remove_agent(self)
             self.model.schedule.remove(self)
-            self.model.num_agents -= 1 
+            self.model.num_agents -= 1
             self.model.destroyed_cars += 1
             return
         self.move()

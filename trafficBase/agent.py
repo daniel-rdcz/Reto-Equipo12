@@ -186,9 +186,11 @@ class Car(Agent):
                         self.model.grid.move_agent(self, new_moves[1])
                         self.path = new_moves[2:]
                 else:
+                    pass
                     #print('FORCED Disabled: No local proactivity')
                     force_move(self.pos, self.grid_Map)
             else:
+                pass
                 print('No path found to: ', self.destination)
                 #print('FORCED Disabled: No local proactivity')
                 force_move(self.pos, self.grid_Map)

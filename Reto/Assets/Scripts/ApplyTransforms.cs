@@ -47,6 +47,7 @@ public class ApplyTransforms : MonoBehaviour
 
         for (int x = 0; x < numWheels; x++) {
             GameObject prefabWheel = Instantiate(wheelPrefab, transform.position, Quaternion.identity);
+            prefabWheel.transform.parent = transform;
             meshWheel[x] = prefabWheel.GetComponentInChildren<MeshFilter>().mesh;
             baseVerticesWheel[x] = meshWheel[x].vertices;
             newVerticesWheel[x] = new Vector3[baseVerticesWheel[x].Length];
